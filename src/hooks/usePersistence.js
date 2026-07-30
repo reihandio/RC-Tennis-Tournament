@@ -3,11 +3,12 @@ import { useEffect, useCallback, useRef } from 'react';
 const STORAGE_KEY = 'tennis_app_state';
 const STATE_VERSION = 2;
 
-function buildState(matchType, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate) {
+function buildState(matchType, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate, doublesSubMode) {
   return {
     version: STATE_VERSION,
     timestamp: new Date().toISOString(),
     matchType,
+    doublesSubMode: doublesSubMode || 'randomized',
     players,
     matches,
     selectedTheme,
@@ -31,6 +32,7 @@ function isValidState(data) {
 
 export function usePersistence({
   matchType,
+  doublesSubMode,
   players,
   matches,
   selectedTheme,
@@ -38,6 +40,7 @@ export function usePersistence({
   customTitle,
   tournamentDate,
   setMatchType,
+  setDoublesSubMode,
   setPlayers,
   setMatches,
   setSelectedTheme,
@@ -69,6 +72,7 @@ export function usePersistence({
       if (data.matchCountInput !== undefined) setMatchCountInput(data.matchCountInput || '');
       if (data.customTitle !== undefined) setCustomTitle(data.customTitle || '');
       if (data.tournamentDate !== undefined) setTournamentDate(data.tournamentDate || '');
+      if (data.doublesSubMode) setDoublesSubMode(data.doublesSubMode);
       hasRestored.current = true;
       setTimeout(() => { isRestoring.current = false; }, 100);
     } catch (e) {
@@ -82,12 +86,12 @@ export function usePersistence({
     if (isRestoring.current || !hasRestored.current) return;
     if (players.length === 0) return;
     try {
-      const state = buildState(matchType, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate);
+      const state = buildState(matchType, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate, doublesSubMode);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch (e) {
       console.warn('Failed to save state to localStorage:', e);
     }
-  }, [matchType, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate]);
+  }, [matchType, doublesSubMode, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate]);
 
   // Mark as restored so auto-save can begin after first load
   useEffect(() => {
@@ -102,7 +106,7 @@ export function usePersistence({
   // --- JSON Export ---
   const exportJSON = useCallback(() => {
     try {
-      const state = buildState(matchType, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate);
+      const state = buildState(matchType, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate, doublesSubMode);
       const json = JSON.stringify(state, null, 2);
       const blob = new Blob([json], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -114,7 +118,7 @@ export function usePersistence({
     } catch (e) {
       console.error('Failed to export JSON:', e);
     }
-  }, [matchType, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate]);
+  }, [matchType, doublesSubMode, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate]);
 
   // --- JSON Import ---
   const importJSON = useCallback(
@@ -136,6 +140,7 @@ export function usePersistence({
           if (data.matchCountInput !== undefined) setMatchCountInput(data.matchCountInput || '');
           if (data.customTitle !== undefined) setCustomTitle(data.customTitle || '');
           if (data.tournamentDate !== undefined) setTournamentDate(data.tournamentDate || '');
+          if (data.doublesSubMode) setDoublesSubMode(data.doublesSubMode);
           if (removeLogo) removeLogo();
           const state = buildState(
             data.matchType || 'singles',
@@ -144,7 +149,8 @@ export function usePersistence({
             data.selectedTheme || 'roland-garros',
             data.matchCountInput || '',
             data.customTitle || '',
-            data.tournamentDate || ''
+            data.tournamentDate || '',
+            data.doublesSubMode || 'randomized'
           );
           localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
           hasRestored.current = true;
@@ -156,7 +162,7 @@ export function usePersistence({
       };
       reader.readAsText(file);
     },
-    [setPlayers, setMatches, setMatchType, setSelectedTheme, setMatchCountInput, setCustomTitle, setTournamentDate, removeLogo]
+    [setPlayers, setMatches, setMatchType, setSelectedTheme, setMatchCountInput, setCustomTitle, setTournamentDate, setDoublesSubMode, removeLogo]
   );
 
   // --- Reset ---

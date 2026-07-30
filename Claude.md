@@ -41,6 +41,18 @@
 - Algorithm must randomize doubles pairings while maintaining equal match distribution across all registered players.
 - Standings remain individual-based (crediting both winning partners with +1 Win).1
 
+# Fixed vs. Randomized Doubles Standings Rules
+
+## Standings Behavior
+- **Fixed Teammates Mode:**
+  - Standings table column header: **Team / Pair** (e.g., "Alcaraz & Nadal").
+  - Matches are played team vs. team.
+  - Wins, losses, and win percentages are tied directly to the **fixed couple** as a single entity on the leaderboard.
+- **Randomized Teammates Mode:**
+  - Standings table column header: **Player** (e.g., "Alcaraz").
+  - Matches shuffle partners every round.
+  - Wins, losses, and win percentages are tracked for **individual players**.
+
 # Tournament State Persistence Rules
 
 ## Save State & Import/Export Features
@@ -55,3 +67,11 @@
 - **Editable Title:** Provide a text input field so the user can customize the main tournament title (defaults to the selected template name, e.g., "Wimbledon", "Roland Garros", or "US Open").
 - **Date Display:** Automatically display today's date (formatted nicely, e.g., "July 30, 2026") below the title inside the export container.
 - **Date Input / Override:** Allow the user to edit or pick a custom date if they are recording matches played on a different day.
+
+# Export Canvas Mobile Layout Rules
+
+## Export Container Formatting (`html-to-image`)
+- **Fixed Width Canvas:** The DOM container attached to `exportRef` MUST have a fixed minimum pixel width (e.g., `w-[600px]` or `min-w-[600px]`) during render/export.
+- **Table Cell Formatting:** 
+  - Use `table-fixed` layout with explicit column widths (e.g., Pos: 10%, Name: 45%, P/W/L: 10% each, Win%: 15%).
+  - Ensure text wrapping/truncation rules (`truncate` or `whitespace-nowrap`) are explicitly set on table cells to prevent awkward line breaks on mobile viewports.

@@ -35,11 +35,13 @@ export function useExport() {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       const dataUrl = await toPng(ref, {
+        cacheBust: true,
         pixelRatio: 2,
-        quality: 1,
+        style: {
+          transform: 'scale(1)',
+        },
         backgroundColor: theme.background,
         filter: (node) => {
-          // Exclude elements marked as no-export
           return !node.classList?.contains('no-export');
         },
       });

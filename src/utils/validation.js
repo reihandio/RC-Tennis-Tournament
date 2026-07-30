@@ -51,15 +51,17 @@ export function validateScore(score) {
  * @param {'singles'|'doubles'} matchType
  * @returns {{ valid: boolean, error: string|null }}
  */
-export function canGenerateMatches(playerCount, matchType = 'singles') {
-  const min = matchType === 'doubles' ? 4 : 2;
+export function canGenerateMatches(playerCount, matchType = 'singles', doublesSubMode = 'randomized') {
+  const isFixedDoubles = matchType === 'doubles' && doublesSubMode === 'fixed';
+  const min = isFixedDoubles ? 2 : matchType === 'doubles' ? 4 : 2;
   if (playerCount < min) {
     return {
       valid: false,
-      error:
-        matchType === 'doubles'
-          ? 'Add at least 4 players for doubles matches'
-          : 'Add at least 2 players to generate matches',
+      error: isFixedDoubles
+        ? 'Add at least 2 pairs for fixed doubles matches'
+        : matchType === 'doubles'
+        ? 'Add at least 4 players for social doubles matches'
+        : 'Add at least 2 players to generate matches',
     };
   }
   if (playerCount > 32) {

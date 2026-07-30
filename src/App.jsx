@@ -20,6 +20,8 @@ export default function App() {
     matchType,
     setMatchType,
     setMatchTypeRaw,
+    doublesSubMode,
+    setDoublesSubMode,
     players,
     setPlayers,
     addPlayer,
@@ -70,6 +72,7 @@ export default function App() {
   // Persistence: auto-save, JSON export/import, reset
   const { exportJSON, importJSON, handleReset } = usePersistence({
     matchType,
+    doublesSubMode,
     players,
     matches,
     selectedTheme,
@@ -77,6 +80,7 @@ export default function App() {
     customTitle,
     tournamentDate,
     setMatchType: setMatchTypeRaw,
+    setDoublesSubMode,
     setPlayers,
     setMatches,
     setSelectedTheme,
@@ -117,10 +121,10 @@ export default function App() {
               </div>
               <div className="hidden sm:block">
                 <h1 className="text-lg font-bold text-slate-800 tracking-tight">
-                  Tennis Match Manager
+                  RC-Tennis Match Manager
                 </h1>
                 <p className="text-xs text-slate-400">
-                  Round-Robin Generator &amp; Grand Slam Export
+                  Round-Robin Generator &amp; Results Exporter
                 </p>
               </div>
             </div>
@@ -142,11 +146,14 @@ export default function App() {
             <div className="bg-white rounded-2xl border border-[#E8ECE9] p-5 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-5">
               <MatchTypeSelector
                 matchType={matchType}
+                doublesSubMode={doublesSubMode}
                 onChange={setMatchType}
+                onSubModeChange={setDoublesSubMode}
               />
               <PlayerManager
                 players={players}
                 matchType={matchType}
+                doublesSubMode={doublesSubMode}
                 onAddPlayer={addPlayer}
                 onRemovePlayer={removePlayer}
               />
@@ -164,14 +171,20 @@ export default function App() {
                 matchCountInput={matchCountInput}
                 onMatchCountChange={setMatchCountInput}
                 matchType={matchType}
+                doublesSubMode={doublesSubMode}
                 onGenerate={generateMatches}
                 onReset={resetMatches}
                 hasMatches={matches.length > 0}
               />
-              {matchType === 'doubles' && players.length > 0 && players.length < 4 && (
+              {matchType === 'doubles' && players.length > 0 && (
+                (doublesSubMode === 'fixed' && players.length < 2) ||
+                (doublesSubMode === 'randomized' && players.length < 4)
+              ) && (
                 <p className="text-amber-600 text-xs mt-3 flex items-center gap-1">
                   <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500" />
-                  Add at least 4 players for rotating doubles matches
+                  {doublesSubMode === 'fixed'
+                    ? 'Add at least 2 pairs for fixed doubles matches'
+                    : 'Add at least 4 players for social doubles matches'}
                 </p>
               )}
             </div>
@@ -193,14 +206,20 @@ export default function App() {
             <div className="bg-white rounded-2xl border border-[#E8ECE9] p-5 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
               <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
                 <span className="w-1.5 h-5 rounded-full bg-[#8A9A86]" />
-                Individual Standings
+                {matchType === 'doubles' && doublesSubMode === 'fixed'
+                  ? 'Team / Pair Standings'
+                  : 'Individual Standings'}
                 {standings.length > 0 && (
                   <span className="text-xs text-slate-400 font-normal">
-                    ({matchType === 'singles' ? 'Singles' : 'Doubles'})
+                    ({matchType === 'singles'
+                      ? 'Singles'
+                      : doublesSubMode === 'fixed'
+                      ? 'Fixed Doubles'
+                      : 'Social Doubles'})
                   </span>
                 )}
               </h3>
-              <StandingsTable standings={standings} matchType={matchType} />
+              <StandingsTable standings={standings} matchType={matchType} doublesSubMode={doublesSubMode} />
             </div>
 
             <div className="bg-white rounded-2xl border border-[#E8ECE9] p-5 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
@@ -248,83 +267,103 @@ export default function App() {
                   </div>
                 </div>
 
-                <div
-                  ref={exportRef}
-                  className="export-container"
-                  style={{
-                    background: theme.gradient,
-                    color: theme.text,
-                    fontFamily: theme.fontFamily,
-                    border: `${theme.borderWidth} solid ${theme.border}`,
-                  }}
-                >
-                  {logo.objectURL && (
-                    <div className="flex justify-center">
-                      <img src={logo.objectURL} alt="Tournament Logo" className="export-logo" />
+                <div className="export-canvas-wrapper">
+                  <div
+                    ref={exportRef}
+                    className="export-container"
+                    style={{
+                      background: theme.gradient,
+                      color: theme.text,
+                      fontFamily: theme.fontFamily,
+                      border: `${theme.borderWidth} solid ${theme.border}`,
+                    }}
+                  >
+                    {/* Header: logo + titles */}
+                    <div className="export-header-row">
+                      {logo.objectURL && (
+                        <img src={logo.objectURL} alt="Tournament Logo" className="export-logo" />
+                      )}
+                      <div className="export-titles">
+                        <div className="export-title" style={{ color: theme.text }}>
+                          {customTitle || theme.name}
+                        </div>
+                        <div className="export-subtitle" style={{ color: theme.text }}>
+                          {displayDate} |{' '}
+                          {matchType === 'singles'
+                            ? 'Singles'
+                            : doublesSubMode === 'fixed'
+                            ? 'Fixed Doubles'
+                            : 'Social Doubles'}{' '}
+                          Standings
+                        </div>
+                      </div>
                     </div>
-                  )}
+                    <div className="export-header-rule" style={{ backgroundColor: theme.headerRule }} />
 
-                  <div className="export-title" style={{ color: theme.text, textAlign: 'center' }}>
-                    {customTitle || theme.name}
+                    <table className="standings-table" style={{ color: theme.text }}>
+                      <thead>
+                        <tr style={{
+                          borderBottomColor: theme.accent + '60',
+                          borderBottomWidth: 2,
+                          borderBottomStyle: 'solid',
+                        }}>
+                          <th className="col-pos">#</th>
+                          <th className="col-name">
+                            {matchType === 'doubles' && doublesSubMode === 'fixed'
+                              ? 'Team / Pair'
+                              : 'Player'}
+                          </th>
+                          <th className="col-stat">P</th>
+                          <th className="col-stat">W</th>
+                          <th className="col-stat">L</th>
+                          <th className="col-stat">Win %</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {standings.map((row, idx) => {
+                          const badgeBg =
+                            idx === 0 ? theme.badgeGold
+                              : idx === 1 ? theme.badgeSilver
+                              : idx === 2 ? theme.badgeBronze
+                              : 'transparent';
+                          const badgeColor =
+                            idx <= 2 ? (theme.logoStyle === 'dark' ? '#1A1A1A' : '#FFFFFF') : theme.text;
+                          return (
+                            <tr key={row.playerId} style={{
+                              borderBottomColor: theme.accent + '40',
+                              borderBottomWidth: 1,
+                              borderBottomStyle: 'solid',
+                            }}>
+                              <td className="col-pos">
+                                {idx <= 2 ? (
+                                  <span className="pos-badge" style={{ backgroundColor: badgeBg, color: badgeColor }}>
+                                    {idx + 1}
+                                  </span>
+                                ) : (
+                                  <span style={{ opacity: 0.5, paddingLeft: 8 }}>{row.position}</span>
+                                )}
+                              </td>
+                              <td className="col-name" style={{
+                                fontWeight: idx === 0 ? 700 : 500,
+                                fontSize: idx === 0 ? '1rem' : '0.9375rem',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                              }}>
+                                {row.playerName}
+                              </td>
+                              <td className="col-stat">{row.played}</td>
+                              <td className="col-stat" style={{ color: theme.winnerColor, fontWeight: 600 }}>{row.wins}</td>
+                              <td className="col-stat" style={{ color: theme.loserColor }}>{row.losses}</td>
+                              <td className="col-stat" style={{ fontWeight: 700 }}>
+                                {row.played > 0 ? `${row.winPct}%` : '—'}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
                   </div>
-                  <div className="export-subtitle" style={{ color: theme.text, textAlign: 'center' }}>
-                    {displayDate} | {matchType === 'singles' ? 'Singles' : 'Doubles'} Standings
-                  </div>
-                  <div className="export-header-rule" style={{ backgroundColor: theme.headerRule }} />
-
-                  <table className="standings-table" style={{ color: theme.text }}>
-                    <thead>
-                      <tr style={{
-                        borderBottomColor: theme.accent + '60',
-                        borderBottomWidth: 2,
-                        borderBottomStyle: 'solid',
-                      }}>
-                        <th style={{ width: '10%' }}>#</th>
-                        <th style={{ width: '42%' }}>Player</th>
-                        <th style={{ width: '12%', textAlign: 'center' }}>P</th>
-                        <th style={{ width: '12%', textAlign: 'center' }}>W</th>
-                        <th style={{ width: '12%', textAlign: 'center' }}>L</th>
-                        <th style={{ width: '12%', textAlign: 'center' }}>Win %</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {standings.map((row, idx) => {
-                        const badgeBg =
-                          idx === 0 ? theme.badgeGold
-                            : idx === 1 ? theme.badgeSilver
-                            : idx === 2 ? theme.badgeBronze
-                            : 'transparent';
-                        const badgeColor =
-                          idx <= 2 ? (theme.logoStyle === 'dark' ? '#1A1A1A' : '#FFFFFF') : theme.text;
-                        return (
-                          <tr key={row.playerId} style={{
-                            borderBottomColor: theme.accent + '40',
-                            borderBottomWidth: 1,
-                            borderBottomStyle: 'solid',
-                          }}>
-                            <td>
-                              {idx <= 2 ? (
-                                <span className="pos-badge" style={{ backgroundColor: badgeBg, color: badgeColor }}>
-                                  {idx + 1}
-                                </span>
-                              ) : (
-                                <span style={{ opacity: 0.5, paddingLeft: 8 }}>{row.position}</span>
-                              )}
-                            </td>
-                            <td style={{ fontWeight: idx === 0 ? 700 : 500, fontSize: idx === 0 ? '1rem' : '0.9375rem' }}>
-                              {row.playerName}
-                            </td>
-                            <td style={{ textAlign: 'center' }}>{row.played}</td>
-                            <td style={{ textAlign: 'center', color: theme.winnerColor, fontWeight: 600 }}>{row.wins}</td>
-                            <td style={{ textAlign: 'center', color: theme.loserColor }}>{row.losses}</td>
-                            <td style={{ textAlign: 'center', fontWeight: 700 }}>
-                              {row.played > 0 ? `${row.winPct}%` : '—'}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
                 </div>
               </div>
             )}
@@ -334,7 +373,7 @@ export default function App() {
 
       <footer className="border-t border-[#E8ECE9] bg-white/50 mt-12">
         <div className="max-w-7xl mx-auto px-4 py-4 text-center text-xs text-slate-400">
-          Tennis Match Manager — Round-Robin Generator &amp; Grand Slam Standings Export
+          ReiCyn 2026 - All rights reserved.
         </div>
       </footer>
     </div>

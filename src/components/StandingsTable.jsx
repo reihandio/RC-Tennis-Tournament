@@ -1,6 +1,6 @@
 import { Medal, Trophy } from 'lucide-react';
 
-export default function StandingsTable({ standings, matchType }) {
+export default function StandingsTable({ standings, matchType, doublesSubMode }) {
   if (standings.length === 0) {
     return (
       <div className="text-center py-12 text-slate-400">
@@ -11,6 +11,9 @@ export default function StandingsTable({ standings, matchType }) {
     );
   }
 
+  const isFixedDoubles = matchType === 'doubles' && doublesSubMode === 'fixed';
+  const label = isFixedDoubles ? 'Team / Pair' : 'Player';
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
@@ -20,7 +23,7 @@ export default function StandingsTable({ standings, matchType }) {
               #
             </th>
             <th className="text-left py-3 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Player
+              {label}
             </th>
             <th className="text-center py-3 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider w-12">
               P

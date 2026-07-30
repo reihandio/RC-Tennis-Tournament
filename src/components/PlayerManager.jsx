@@ -2,12 +2,16 @@ import { useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { validatePlayerName } from '../utils/validation';
 
-export default function PlayerManager({ players, matchType, onAddPlayer, onRemovePlayer }) {
+export default function PlayerManager({ players, matchType, doublesSubMode, onAddPlayer, onRemovePlayer }) {
   const [inputValue, setInputValue] = useState('');
   const [error, setError] = useState(null);
 
-  const placeholder =
-    matchType === 'singles' ? 'Enter player name...' : 'Enter player name...';
+  const isFixedDoubles = matchType === 'doubles' && doublesSubMode === 'fixed';
+  const placeholder = isFixedDoubles
+    ? 'Enter pair name (e.g. Alcaraz & Nadal)...'
+    : 'Enter player name...';
+
+  const minLabel = isFixedDoubles ? '2 pairs' : matchType === 'singles' ? '2' : '4';
 
   const handleAdd = () => {
     const result = validatePlayerName(inputValue, players);
@@ -32,7 +36,7 @@ export default function PlayerManager({ players, matchType, onAddPlayer, onRemov
   return (
     <div className="w-full">
       <label className="block text-sm font-semibold text-slate-700 mb-2">
-        Players
+        {isFixedDoubles ? 'Pairs / Teams' : 'Players'}
         <span className="text-slate-400 font-normal ml-1">({players.length})</span>
       </label>
 
@@ -87,7 +91,7 @@ export default function PlayerManager({ players, matchType, onAddPlayer, onRemov
 
       {players.length === 0 && (
         <p className="text-sm text-slate-400 italic">
-          Add at least {matchType === 'singles' ? '2' : '4'} players to generate matches
+          Add at least {minLabel} players to generate matches
         </p>
       )}
     </div>

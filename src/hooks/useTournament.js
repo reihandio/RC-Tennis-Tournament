@@ -13,7 +13,14 @@ const DEFAULT_SINGLES = [
   'Daniil Medvedev',
 ];
 
-const DEFAULT_DOUBLES_PLAYERS = [
+const DEFAULT_DOUBLES_FIXED = [
+  'Alcaraz & Nadal',
+  'Sinner & Medvedev',
+  'Djokovic & Murray',
+  'Ruud & Rune',
+];
+
+const DEFAULT_DOUBLES_RANDOM = [
   'Cynthia',
   'Rei',
   'Alex',
@@ -22,14 +29,20 @@ const DEFAULT_DOUBLES_PLAYERS = [
 
 export function useTournament() {
   const [matchType, setMatchType] = useState('singles');
+  const [doublesSubMode, setDoublesSubMode] = useState('randomized'); // 'fixed' | 'randomized'
   const [players, setPlayers] = useState([]);
   const [matches, setMatches] = useState([]);
   const [matchCountInput, setMatchCountInput] = useState('');
   const playersRef = useRef(players);
+  const subModeRef = useRef(doublesSubMode);
 
   useEffect(() => {
     playersRef.current = players;
   }, [players]);
+
+  useEffect(() => {
+    subModeRef.current = doublesSubMode;
+  }, [doublesSubMode]);
 
   const setMatchTypeWithReset = useCallback((type) => {
     setMatchType(type);
@@ -67,12 +80,21 @@ export function useTournament() {
   const generateMatches = useCallback((customCount) => {
     const currentPlayers = playersRef.current;
     const targetCount = customCount || undefined;
+
     if (matchType === 'singles') {
       if (currentPlayers.length < 2) return;
       setMatches(generateRoundRobin(currentPlayers, targetCount));
     } else {
-      if (currentPlayers.length < 4) return;
-      setMatches(generateSocialDoubles(currentPlayers, targetCount));
+      // Doubles — check sub-mode
+      if (subModeRef.current === 'fixed') {
+        // Fixed pairs: each player entry IS a pair
+        if (currentPlayers.length < 2) return;
+        setMatches(generateRoundRobin(currentPlayers, targetCount));
+      } else {
+        // Randomized/social doubles
+        if (currentPlayers.length < 4) return;
+        setMatches(generateSocialDoubles(currentPlayers, targetCount));
+      }
     }
   }, [matchType]);
 
@@ -110,9 +132,9 @@ export function useTournament() {
 
   const resetAll = useCallback(() => {
     setMatchType('singles');
+    setDoublesSubMode('randomized');
     setMatchCountInput('');
     setMatches([]);
-    // Load fresh defaults
     const defaultPlayers = DEFAULT_SINGLES.map((name) => ({
       id: generateId('player'),
       name,
@@ -126,12 +148,16 @@ export function useTournament() {
   const defaultMatchCount =
     matchType === 'singles'
       ? participantCount >= 2 ? (participantCount * (participantCount - 1)) / 2 : 0
+      : doublesSubMode === 'fixed'
+      ? participantCount >= 2 ? (participantCount * (participantCount - 1)) / 2 : 0
       : participantCount >= 4 ? Math.max(participantCount, 4) * Math.floor(participantCount / 4) : 0;
 
   return {
     matchType,
     setMatchTypeRaw: setMatchType,
     setMatchType: setMatchTypeWithReset,
+    doublesSubMode,
+    setDoublesSubMode,
     players,
     setPlayers,
     addPlayer,

@@ -7,16 +7,20 @@ export default function MatchGenerator({
   matchCountInput,
   onMatchCountChange,
   matchType,
+  doublesSubMode,
   onGenerate,
   onReset,
   hasMatches,
 }) {
-  const validation = canGenerateMatches(participants.length, matchType);
+  const validation = canGenerateMatches(participants.length, matchType, doublesSubMode);
   const activeCount = matchCountInput || defaultMatchCount;
-  const description =
-    matchType === 'doubles'
-      ? 'Rotating partners — social doubles format'
-      : 'Full round-robin';
+
+  const isFixedDoubles = matchType === 'doubles' && doublesSubMode === 'fixed';
+  const description = isFixedDoubles
+    ? 'Fixed pairs — full round-robin'
+    : matchType === 'doubles'
+    ? 'Rotating partners — social doubles format'
+    : 'Full round-robin';
 
   const handleGenerate = () => {
     const count = matchCountInput ? parseInt(matchCountInput, 10) : undefined;
@@ -30,18 +34,16 @@ export default function MatchGenerator({
       </label>
 
       <div className="flex flex-col gap-3">
-        {/* Info */}
         {validation.valid && (
           <div className="flex items-center gap-2 text-sm text-slate-600 bg-[#E8ECE9]/50 rounded-xl px-4 py-3">
             <Swords size={16} className="text-[#8A9A86]" />
             <span>
-              {participants.length} players →{' '}
+              {participants.length} {isFixedDoubles ? 'pairs' : 'players'} →{' '}
               <strong>~{activeCount}</strong> matches ({description})
             </span>
           </div>
         )}
 
-        {/* Manual match count input */}
         {validation.valid && (
           <div className="flex items-center gap-2">
             <label className="text-xs font-medium text-slate-500 whitespace-nowrap flex items-center gap-1">
@@ -52,7 +54,7 @@ export default function MatchGenerator({
               type="number"
               inputMode="numeric"
               min={1}
-              max={matchType === 'singles'
+              max={matchType === 'singles' || isFixedDoubles
                 ? (participants.length * (participants.length - 1)) / 2
                 : Math.max(participants.length, 4) * Math.floor(participants.length / 4)}
               value={matchCountInput}
@@ -66,7 +68,6 @@ export default function MatchGenerator({
           </div>
         )}
 
-        {/* Buttons */}
         <div className="flex gap-2">
           <button
             type="button"
@@ -75,7 +76,7 @@ export default function MatchGenerator({
             className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-[#8A9A86] text-white rounded-xl text-sm font-semibold hover:bg-[#6B7D67] active:bg-[#5A6B57] transition-all shadow-[0_2px_8px_rgba(138,154,134,0.3)] disabled:bg-slate-300 disabled:text-slate-400 disabled:cursor-not-allowed disabled:shadow-none"
           >
             <Swords size={16} />
-            Generate {matchType === 'doubles' ? 'Doubles' : 'All'} Matches
+            Generate {isFixedDoubles ? 'Fixed Doubles' : matchType === 'doubles' ? 'Doubles' : 'All'} Matches
           </button>
 
           {hasMatches && (
