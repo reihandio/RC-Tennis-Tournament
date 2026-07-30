@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #FAF9F6;
+}
+
+/* Export container — professional tournament poster styling */
+.export-container {
+  width: 800px;
+  max-width: 100%;
+  padding: 48px;
+  border-radius: 0;
+}
+
+.export-container .standings-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.export-container .standings-table th,
+.export-container .standings-table td {
+  padding: 14px 16px;
+  text-align: left;
+}
+
+.export-container .standings-table th {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.8125rem;
+}
+
+.export-container .standings-table td {
+  font-size: 0.9375rem;
+}
+
+.export-container .standings-table tbody tr {
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+}
+
+.export-container .export-logo {
+  max-height: 72px;
+  max-width: 220px;
+  object-fit: contain;
+  margin-bottom: 20px;
+}
+
+.export-container .export-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+}
+
+.export-container .export-subtitle {
+  font-size: 0.875rem;
+  opacity: 0.75;
+  margin-bottom: 28px;
+}
+
+.export-container .export-header-rule {
+  height: 2px;
+  width: 60px;
+  margin: 12px auto 28px;
+  border-radius: 1px;
+}
+
+.export-container .pos-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
