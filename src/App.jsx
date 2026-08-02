@@ -96,7 +96,7 @@ export default function App() {
 
   const handleExport = () => {
     if (exportRef.current && standings.length > 0) {
-      exportPNG(exportRef.current, theme, logo);
+      exportPNG(exportRef.current, theme);
     }
   };
 
