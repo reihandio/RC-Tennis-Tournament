@@ -3,7 +3,7 @@ import { useEffect, useCallback, useRef } from 'react';
 const STORAGE_KEY = 'tennis_app_state';
 const STATE_VERSION = 2;
 
-function buildState(matchType, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate, doublesSubMode) {
+function buildState(matchType, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate, doublesSubMode, columnPrefs, customValues, pointsPerWin) {
   return {
     version: STATE_VERSION,
     timestamp: new Date().toISOString(),
@@ -15,6 +15,9 @@ function buildState(matchType, players, matches, selectedTheme, matchCountInput,
     matchCountInput,
     customTitle,
     tournamentDate,
+    columnPrefs: columnPrefs || { gd: false, pts: false, custom: false },
+    customValues: customValues || {},
+    pointsPerWin: pointsPerWin || 2,
   };
 }
 
@@ -39,6 +42,9 @@ export function usePersistence({
   matchCountInput,
   customTitle,
   tournamentDate,
+  columnPrefs,
+  customValues,
+  pointsPerWin,
   setMatchType,
   setDoublesSubMode,
   setPlayers,
@@ -47,6 +53,9 @@ export function usePersistence({
   setMatchCountInput,
   setCustomTitle,
   setTournamentDate,
+  setColumnPrefs,
+  setCustomValues,
+  setPointsPerWin,
   resetAll,
   removeLogo,
 }) {
@@ -73,6 +82,9 @@ export function usePersistence({
       if (data.customTitle !== undefined) setCustomTitle(data.customTitle || '');
       if (data.tournamentDate !== undefined) setTournamentDate(data.tournamentDate || '');
       if (data.doublesSubMode) setDoublesSubMode(data.doublesSubMode);
+      if (data.columnPrefs) setColumnPrefs(data.columnPrefs);
+      if (data.customValues) setCustomValues(data.customValues);
+      if (data.pointsPerWin !== undefined) setPointsPerWin(data.pointsPerWin);
       hasRestored.current = true;
       setTimeout(() => { isRestoring.current = false; }, 100);
     } catch (e) {
@@ -86,12 +98,12 @@ export function usePersistence({
     if (isRestoring.current || !hasRestored.current) return;
     if (players.length === 0) return;
     try {
-      const state = buildState(matchType, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate, doublesSubMode);
+      const state = buildState(matchType, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate, doublesSubMode, columnPrefs, customValues, pointsPerWin);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch (e) {
       console.warn('Failed to save state to localStorage:', e);
     }
-  }, [matchType, doublesSubMode, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate]);
+  }, [matchType, doublesSubMode, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate, columnPrefs, customValues, pointsPerWin]);
 
   // Mark as restored so auto-save can begin after first load
   useEffect(() => {
@@ -106,7 +118,7 @@ export function usePersistence({
   // --- JSON Export ---
   const exportJSON = useCallback(() => {
     try {
-      const state = buildState(matchType, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate, doublesSubMode);
+      const state = buildState(matchType, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate, doublesSubMode, columnPrefs, customValues, pointsPerWin);
       const json = JSON.stringify(state, null, 2);
       const blob = new Blob([json], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -118,7 +130,7 @@ export function usePersistence({
     } catch (e) {
       console.error('Failed to export JSON:', e);
     }
-  }, [matchType, doublesSubMode, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate]);
+  }, [matchType, doublesSubMode, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate, columnPrefs, customValues, pointsPerWin]);
 
   // --- JSON Import ---
   const importJSON = useCallback(
@@ -141,6 +153,9 @@ export function usePersistence({
           if (data.customTitle !== undefined) setCustomTitle(data.customTitle || '');
           if (data.tournamentDate !== undefined) setTournamentDate(data.tournamentDate || '');
           if (data.doublesSubMode) setDoublesSubMode(data.doublesSubMode);
+          if (data.columnPrefs) setColumnPrefs(data.columnPrefs);
+          if (data.customValues) setCustomValues(data.customValues);
+          if (data.pointsPerWin !== undefined) setPointsPerWin(data.pointsPerWin);
           if (removeLogo) removeLogo();
           const state = buildState(
             data.matchType || 'singles',
@@ -150,7 +165,10 @@ export function usePersistence({
             data.matchCountInput || '',
             data.customTitle || '',
             data.tournamentDate || '',
-            data.doublesSubMode || 'randomized'
+            data.doublesSubMode || 'randomized',
+            data.columnPrefs || { gd: false, pts: false, custom: false },
+            data.customValues || {},
+            data.pointsPerWin || 2
           );
           localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
           hasRestored.current = true;
@@ -162,7 +180,7 @@ export function usePersistence({
       };
       reader.readAsText(file);
     },
-    [setPlayers, setMatches, setMatchType, setSelectedTheme, setMatchCountInput, setCustomTitle, setTournamentDate, setDoublesSubMode, removeLogo]
+    [setPlayers, setMatches, setMatchType, setSelectedTheme, setMatchCountInput, setCustomTitle, setTournamentDate, setDoublesSubMode, setColumnPrefs, setCustomValues, setPointsPerWin, removeLogo]
   );
 
   // --- Reset ---

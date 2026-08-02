@@ -1,14 +1,10 @@
 import { useMemo } from 'react';
 import { calculateStandings } from '../utils/standingsCalc';
 
-/**
- * @param {Array} matches
- * @param {Array<{id: string, name: string}>} participants - individual players
- */
-export function useStandings(matches, participants) {
+export function useStandings(matches, participants, { pointsPerWin = 2 } = {}) {
   const standings = useMemo(() => {
-    return calculateStandings(participants, matches);
-  }, [matches, participants]);
+    return calculateStandings(participants, matches, { pointsPerWin });
+  }, [matches, participants, pointsPerWin]);
 
   return standings;
 }

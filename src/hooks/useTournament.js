@@ -29,10 +29,15 @@ const DEFAULT_DOUBLES_RANDOM = [
 
 export function useTournament() {
   const [matchType, setMatchType] = useState('singles');
-  const [doublesSubMode, setDoublesSubMode] = useState('randomized'); // 'fixed' | 'randomized'
+  const [doublesSubMode, setDoublesSubMode] = useState('randomized');
   const [players, setPlayers] = useState([]);
   const [matches, setMatches] = useState([]);
   const [matchCountInput, setMatchCountInput] = useState('');
+
+  // Column preferences & custom values
+  const [columnPrefs, setColumnPrefs] = useState({ gd: false, pts: false, custom: false });
+  const [customValues, setCustomValues] = useState({}); // { playerId: string }
+  const [pointsPerWin, setPointsPerWin] = useState(2);
   const playersRef = useRef(players);
   const subModeRef = useRef(doublesSubMode);
 
@@ -248,6 +253,12 @@ export function useTournament() {
     defaultMatchCount,
     matchCountInput,
     setMatchCountInput,
+    columnPrefs,
+    setColumnPrefs,
+    customValues,
+    setCustomValues,
+    pointsPerWin,
+    setPointsPerWin,
     participants: players,
   };
 }

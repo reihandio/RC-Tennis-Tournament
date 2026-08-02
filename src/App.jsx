@@ -13,6 +13,7 @@ import LogoUploader from './components/LogoUploader';
 import MatchGenerator from './components/MatchGenerator';
 import MatchList from './components/MatchList';
 import StandingsTable from './components/StandingsTable';
+import ColumnManager from './components/ColumnManager';
 import ExportPanel from './components/ExportPanel';
 
 export default function App() {
@@ -38,10 +39,16 @@ export default function App() {
     defaultMatchCount,
     matchCountInput,
     setMatchCountInput,
+    columnPrefs,
+    setColumnPrefs,
+    customValues,
+    setCustomValues,
+    pointsPerWin,
+    setPointsPerWin,
     participants,
   } = useTournament();
 
-  const standings = useStandings(matches, participants);
+  const standings = useStandings(matches, participants, { pointsPerWin });
   const { logo, handleLogoUpload, removeLogo } = useLogos();
   const { exportPNG, exporting, error: exportError } = useExport();
 
@@ -82,6 +89,9 @@ export default function App() {
     matchCountInput,
     customTitle,
     tournamentDate,
+    columnPrefs,
+    customValues,
+    pointsPerWin,
     setMatchType: setMatchTypeRaw,
     setDoublesSubMode,
     setPlayers,
@@ -90,6 +100,9 @@ export default function App() {
     setMatchCountInput,
     setCustomTitle,
     setTournamentDate,
+    setColumnPrefs,
+    setCustomValues,
+    setPointsPerWin,
     resetAll,
     removeLogo,
   });
@@ -226,7 +239,24 @@ export default function App() {
                   </span>
                 )}
               </h3>
-              <StandingsTable standings={standings} matchType={matchType} doublesSubMode={doublesSubMode} />
+              <ColumnManager
+                columnPrefs={columnPrefs}
+                onToggleColumn={(key, val) => setColumnPrefs((p) => ({ ...p, [key]: val }))}
+                pointsPerWin={pointsPerWin}
+                onPointsPerWinChange={setPointsPerWin}
+              />
+              <div className="mt-3">
+                <StandingsTable
+                  standings={standings}
+                  matchType={matchType}
+                  doublesSubMode={doublesSubMode}
+                  columnPrefs={columnPrefs}
+                  customValues={customValues}
+                  onCustomValueChange={(playerId, val) =>
+                    setCustomValues((prev) => ({ ...prev, [playerId]: val }))
+                  }
+                />
+              </div>
             </div>
 
             <div className="bg-white rounded-2xl border border-[#E8ECE9] p-5 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
@@ -314,16 +344,19 @@ export default function App() {
                           borderBottomWidth: 2,
                           borderBottomStyle: 'solid',
                         }}>
-                          <th className="col-pos">#</th>
-                          <th className="col-name">
+                          <th className="col-pos" style={{ width: '6%' }}>#</th>
+                          <th className="col-name" style={{ width: columnPrefs.custom ? '26%' : '33%' }}>
                             {matchType === 'doubles' && doublesSubMode === 'fixed'
                               ? 'Team / Pair'
                               : 'Player'}
                           </th>
-                          <th className="col-stat">P</th>
-                          <th className="col-stat">W</th>
-                          <th className="col-stat">L</th>
-                          <th className="col-stat">Win %</th>
+                          <th className="col-stat" style={{ width: '7%' }}>P</th>
+                          <th className="col-stat" style={{ width: '7%' }}>W</th>
+                          <th className="col-stat" style={{ width: '7%' }}>L</th>
+                          <th className="col-stat" style={{ width: '8%' }}>+/-</th>
+                          <th className="col-stat" style={{ width: '10%' }}>Win %</th>
+                          <th className="col-stat" style={{ width: '7%' }}>PTS</th>
+                          {columnPrefs.custom && <th className="col-stat" style={{ width: '12%' }}>Note</th>}
                         </tr>
                       </thead>
                       <tbody>
@@ -341,7 +374,7 @@ export default function App() {
                               borderBottomWidth: 1,
                               borderBottomStyle: 'solid',
                             }}>
-                              <td className="col-pos">
+                              <td className="col-pos" style={{ width: '6%' }}>
                                 {idx <= 2 ? (
                                   <span className="pos-badge" style={{ backgroundColor: badgeBg, color: badgeColor }}>
                                     {idx + 1}
@@ -359,12 +392,25 @@ export default function App() {
                               }}>
                                 {row.playerName}
                               </td>
-                              <td className="col-stat">{row.played}</td>
-                              <td className="col-stat" style={{ color: theme.winnerColor, fontWeight: 600 }}>{row.wins}</td>
-                              <td className="col-stat" style={{ color: theme.loserColor }}>{row.losses}</td>
-                              <td className="col-stat" style={{ fontWeight: 700 }}>
+                              <td className="col-stat" style={{ width: '7%' }}>{row.played}</td>
+                              <td className="col-stat" style={{ width: '7%', color: theme.winnerColor, fontWeight: 600 }}>{row.wins}</td>
+                              <td className="col-stat" style={{ width: '7%', color: theme.loserColor }}>{row.losses}</td>
+                              <td className="col-stat" style={{
+                                width: '8%',
+                                fontWeight: 600,
+                                color: row.gameDiff > 0 ? theme.winnerColor : row.gameDiff < 0 ? theme.loserColor : theme.text,
+                              }}>
+                                {row.gameDiff > 0 ? '+' : ''}{row.gameDiff}
+                              </td>
+                              <td className="col-stat" style={{ width: '10%', fontWeight: 700 }}>
                                 {row.played > 0 ? `${row.winPct}%` : '—'}
                               </td>
+                              <td className="col-stat" style={{ width: '7%', fontWeight: 600 }}>{row.points}</td>
+                              {columnPrefs.custom && (
+                                <td className="col-stat" style={{ width: '12%', fontSize: '0.8rem' }}>
+                                  {customValues[row.playerId] || '—'}
+                                </td>
+                              )}
                             </tr>
                           );
                         })}

@@ -87,3 +87,14 @@
   - Allow deleting an unwanted generated match.
   - Provide a "Save / Update Match" button that recalculates standings in real-time upon saving.
 - **Persistence:** Save all manually edited/added matches inside `localStorage` and the downloadable JSON export.
+
+
+# Standings Table & Export Column Customization Rules
+
+## Custom Standings Columns
+- **Default Core Columns:** `Pos | Player/Team | P | W | L | Win %`
+- **Active Additional Columns:**
+  - **Game Difference (+/- or GD):** Track total net game difference (Total Games Won minus Total Games Lost) as the primary tiebreaker metric. *(Note: GW and GL are excluded to keep the layout minimal).*
+  - **Points (PTS):** Total points accumulated (e.g., +2 pts per match win).
+- **Final Column Layout:** `# | PLAYER / TEAM | P | W | L | +/- | WIN% | PTS`
+- **Export Consistency:** The Grand Slam export container (`ref={exportRef}`) MUST strictly mirror this clean 8-column layout with fixed column width distributions (`table-fixed`) so headers and cells align seamlessly in the exported PNG poster image across all devices.
