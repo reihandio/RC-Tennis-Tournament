@@ -75,3 +75,15 @@
 - **Table Cell Formatting:** 
   - Use `table-fixed` layout with explicit column widths (e.g., Pos: 10%, Name: 45%, P/W/L: 10% each, Win%: 15%).
   - Ensure text wrapping/truncation rules (`truncate` or `whitespace-nowrap`) are explicitly set on table cells to prevent awkward line breaks on mobile viewports.
+
+# Match Editing & Overrides Rules
+
+## Manual Match Editor & Save State
+- **Editable Match Fields:**
+  - *Singles Mode:* Player 1, Player 2, Score 1, Score 2.
+  - *Doubles Mode (Randomized & Fixed):* Team/Pair 1 (Player A & Player B), Team/Pair 2 (Player C & Player D), Score 1, Score 2.
+- **Match Management Actions:**
+  - Allow adding a manual custom match (e.g., "Add Custom Fixture").
+  - Allow deleting an unwanted generated match.
+  - Provide a "Save / Update Match" button that recalculates standings in real-time upon saving.
+- **Persistence:** Save all manually edited/added matches inside `localStorage` and the downloadable JSON export.

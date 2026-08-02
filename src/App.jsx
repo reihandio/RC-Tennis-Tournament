@@ -30,6 +30,9 @@ export default function App() {
     setMatches,
     generateMatches,
     updateScore,
+    deleteMatch,
+    saveMatchEdit,
+    addCustomMatch,
     resetMatches,
     resetAll,
     defaultMatchCount,
@@ -189,13 +192,17 @@ export default function App() {
               )}
             </div>
 
-            {matches.length > 0 && (
+            {players.length >= 2 && (
               <div className="bg-white rounded-2xl border border-[#E8ECE9] p-5 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
                 <MatchList
                   matches={matches}
                   players={players}
                   matchType={matchType}
+                  doublesSubMode={doublesSubMode}
                   onUpdateScore={updateScore}
+                  onSaveEdit={saveMatchEdit}
+                  onDelete={deleteMatch}
+                  onAddCustom={addCustomMatch}
                 />
               </div>
             )}

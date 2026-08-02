@@ -128,6 +128,80 @@ export function useTournament() {
     setMatchCountInput('');
   }, []);
 
+  // --- Match Editing ---
+
+  const deleteMatch = useCallback((matchId) => {
+    setMatches((prev) => prev.filter((m) => m.id !== matchId));
+  }, []);
+
+  const saveMatchEdit = useCallback((matchId, editData) => {
+    setMatches((prev) =>
+      prev.map((m) => {
+        if (m.id !== matchId) return m;
+        const updated = {
+          ...m,
+          team1PlayerIds: editData.team1PlayerIds,
+          team2PlayerIds: editData.team2PlayerIds,
+          team1Score: editData.team1Score,
+          team2Score: editData.team2Score,
+        };
+        // Recalculate winner
+        const s1 = updated.team1Score;
+        const s2 = updated.team2Score;
+        if (
+          s1 !== '' && s2 !== '' &&
+          /^\d+$/.test(String(s1).trim()) &&
+          /^\d+$/.test(String(s2).trim())
+        ) {
+          const n1 = parseInt(s1, 10);
+          const n2 = parseInt(s2, 10);
+          if (n1 > n2) updated.winnerId = 'team1';
+          else if (n2 > n1) updated.winnerId = 'team2';
+          else updated.winnerId = 'draw';
+        } else {
+          updated.winnerId = null;
+        }
+        return updated;
+      })
+    );
+  }, []);
+
+  const addCustomMatch = useCallback(() => {
+    const currentPlayers = playersRef.current;
+    const matchId = generateId('match');
+    const currentSubMode = subModeRef.current;
+
+    let team1Ids, team2Ids;
+
+    if (matchType === 'singles') {
+      team1Ids = currentPlayers.length > 0 ? [currentPlayers[0].id] : [];
+      team2Ids = currentPlayers.length > 1 ? [currentPlayers[1].id] : [];
+    } else if (currentSubMode === 'fixed') {
+      team1Ids = currentPlayers.length > 0 ? [currentPlayers[0].id] : [];
+      team2Ids = currentPlayers.length > 1 ? [currentPlayers[1].id] : [];
+    } else {
+      // Randomized doubles: 2 players per team
+      team1Ids = currentPlayers.length > 1
+        ? [currentPlayers[0].id, currentPlayers[1].id]
+        : currentPlayers.length > 0 ? [currentPlayers[0].id] : [];
+      team2Ids = currentPlayers.length > 3
+        ? [currentPlayers[2].id, currentPlayers[3].id]
+        : currentPlayers.length > 2 ? [currentPlayers[2].id] : [];
+    }
+
+    setMatches((prev) => [
+      ...prev,
+      {
+        id: matchId,
+        team1PlayerIds: team1Ids,
+        team2PlayerIds: team2Ids,
+        team1Score: '',
+        team2Score: '',
+        winnerId: null,
+      },
+    ]);
+  }, [matchType]);
+
   // --- Reset All ---
 
   const resetAll = useCallback(() => {
@@ -166,6 +240,9 @@ export function useTournament() {
     setMatches,
     generateMatches,
     updateScore,
+    deleteMatch,
+    saveMatchEdit,
+    addCustomMatch,
     resetMatches,
     resetAll,
     defaultMatchCount,
