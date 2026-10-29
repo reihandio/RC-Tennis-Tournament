@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Trophy, Pencil, Trash2, Check, X } from 'lucide-react';
 import { validateScore } from '../utils/validation';
+import { findMatchConflict, getMatchCourt, getMatchRound } from '../utils/scheduler';
 
 /**
  * MatchCard — view mode shows stacked team names + scores.
@@ -11,6 +12,7 @@ export default function MatchCard({
   team1Name,
   team2Name,
   players,
+  allMatches,
   matchType,
   doublesSubMode,
   onScoreChange,
@@ -22,6 +24,11 @@ export default function MatchCard({
 
   // Edit state
   const [editData, setEditData] = useState(null);
+
+  const conflict = useMemo(() => {
+    if (!editing || !editData) return { valid: true, error: null };
+    return findMatchConflict(allMatches || [], match.id, editData, players);
+  }, [editing, editData, allMatches, match.id, players]);
 
   // --- View mode helpers ---
   const isComplete =
@@ -48,6 +55,8 @@ export default function MatchCard({
       team2PlayerIds: [...match.team2PlayerIds],
       team1Score: match.team1Score,
       team2Score: match.team2Score,
+      round: getMatchRound(match),
+      court: getMatchCourt(match),
     });
     setEditing(true);
   };
@@ -58,11 +67,11 @@ export default function MatchCard({
   };
 
   const saveEditing = () => {
-    if (editData) {
+    if (editData && conflict.valid) {
       onSaveEdit(match.id, editData);
+      setEditing(false);
+      setEditData(null);
     }
-    setEditing(false);
-    setEditData(null);
   };
 
   // --- Edit helpers ---
@@ -82,6 +91,11 @@ export default function MatchCard({
     if (!editData) return;
     const key = team === 1 ? 'team1Score' : 'team2Score';
     setEditData({ ...editData, [key]: value });
+  };
+
+  const updateEditField = (field, value) => {
+    if (!editData) return;
+    setEditData({ ...editData, [field]: value });
   };
 
   const playerSelect = (team, slot, value) => (
@@ -178,6 +192,51 @@ export default function MatchCard({
 
   return (
     <div className="bg-white border border-[#E8ECE9] rounded-2xl p-4 shadow-[0_2px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-shadow">
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+          Round {getMatchRound(match)}
+        </span>
+        <span className="inline-flex items-center rounded-full bg-[#E8ECE9] px-2.5 py-1 text-[11px] font-semibold text-[#6B7D67]">
+          Court {getMatchCourt(match)}
+        </span>
+      </div>
+
+      {editing && editData && (
+        <div className="grid grid-cols-2 gap-2 mb-3">
+          <label className="text-xs font-medium text-slate-500">
+            Round
+            <input
+              type="number"
+              min={1}
+              value={editData.round}
+              onChange={(e) => updateEditField('round', e.target.value)}
+              className="mt-1 w-full px-2 py-1.5 border-2 border-[#E8ECE9] rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-[#8A9A86] focus:border-transparent bg-white"
+            />
+          </label>
+          <label className="text-xs font-medium text-slate-500">
+            Court
+            <select
+              value={editData.court}
+              onChange={(e) => updateEditField('court', e.target.value)}
+              className="mt-1 w-full px-2 py-1.5 border-2 border-[#E8ECE9] rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-[#8A9A86] focus:border-transparent bg-white"
+            >
+              {[1, 2, 3, 4].map((court) => (
+                <option key={court} value={court}>
+                  Court {court}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      )}
+
+      {editing && !conflict.valid && (
+        <p className="text-red-500 text-xs mb-3 flex items-center gap-1">
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-500" />
+          {conflict.error}
+        </p>
+      )}
+
       {/* Team 1 */}
       {teamRow(1, match.team1PlayerIds, match.team1Score, 'team1Score', t1Wins, t2Wins)}
 
@@ -204,7 +263,8 @@ export default function MatchCard({
             <button
               type="button"
               onClick={saveEditing}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#8A9A86] text-white hover:bg-[#6B7D67] transition-colors"
+              disabled={!conflict.valid}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#8A9A86] text-white hover:bg-[#6B7D67] transition-colors disabled:bg-slate-300 disabled:text-slate-400 disabled:cursor-not-allowed"
             >
               <Check size={14} />
               Save

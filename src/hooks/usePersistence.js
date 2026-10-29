@@ -1,16 +1,17 @@
 import { useEffect, useCallback, useRef } from 'react';
+import { clampCourtCount, normalizeMatches } from '../utils/scheduler';
 
-const STORAGE_KEY = 'tennis_app_state';
-const STATE_VERSION = 2;
+export const STORAGE_KEY = 'tennis_app_state';
+const STATE_VERSION = 3;
 
-function buildState(matchType, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate, doublesSubMode, columnPrefs, customValues, pointsPerWin) {
+function buildState(matchType, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate, doublesSubMode, columnPrefs, customValues, pointsPerWin, courtCount) {
   return {
     version: STATE_VERSION,
     timestamp: new Date().toISOString(),
     matchType,
     doublesSubMode: doublesSubMode || 'randomized',
     players,
-    matches,
+    matches: normalizeMatches(matches),
     selectedTheme,
     matchCountInput,
     customTitle,
@@ -18,6 +19,7 @@ function buildState(matchType, players, matches, selectedTheme, matchCountInput,
     columnPrefs: columnPrefs || { gd: false, pts: false, custom: false },
     customValues: customValues || {},
     pointsPerWin: pointsPerWin || 2,
+    courtCount: clampCourtCount(courtCount),
   };
 }
 
@@ -45,6 +47,7 @@ export function usePersistence({
   columnPrefs,
   customValues,
   pointsPerWin,
+  courtCount,
   setMatchType,
   setDoublesSubMode,
   setPlayers,
@@ -56,6 +59,7 @@ export function usePersistence({
   setColumnPrefs,
   setCustomValues,
   setPointsPerWin,
+  setCourtCount,
   resetAll,
   removeLogo,
 }) {
@@ -75,8 +79,9 @@ export function usePersistence({
       }
       isRestoring.current = true;
       if (data.players && data.players.length > 0) setPlayers(data.players);
-      if (data.matches) setMatches(data.matches);
+      if (data.matches) setMatches(normalizeMatches(data.matches));
       if (data.matchType) setMatchType(data.matchType);
+      if (data.courtCount !== undefined) setCourtCount(data.courtCount);
       if (data.selectedTheme) setSelectedTheme(data.selectedTheme);
       if (data.matchCountInput !== undefined) setMatchCountInput(data.matchCountInput || '');
       if (data.customTitle !== undefined) setCustomTitle(data.customTitle || '');
@@ -98,12 +103,12 @@ export function usePersistence({
     if (isRestoring.current || !hasRestored.current) return;
     if (players.length === 0) return;
     try {
-      const state = buildState(matchType, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate, doublesSubMode, columnPrefs, customValues, pointsPerWin);
+      const state = buildState(matchType, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate, doublesSubMode, columnPrefs, customValues, pointsPerWin, courtCount);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch (e) {
       console.warn('Failed to save state to localStorage:', e);
     }
-  }, [matchType, doublesSubMode, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate, columnPrefs, customValues, pointsPerWin]);
+  }, [matchType, doublesSubMode, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate, columnPrefs, customValues, pointsPerWin, courtCount]);
 
   // Mark as restored so auto-save can begin after first load
   useEffect(() => {
@@ -118,7 +123,7 @@ export function usePersistence({
   // --- JSON Export ---
   const exportJSON = useCallback(() => {
     try {
-      const state = buildState(matchType, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate, doublesSubMode, columnPrefs, customValues, pointsPerWin);
+      const state = buildState(matchType, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate, doublesSubMode, columnPrefs, customValues, pointsPerWin, courtCount);
       const json = JSON.stringify(state, null, 2);
       const blob = new Blob([json], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -130,7 +135,7 @@ export function usePersistence({
     } catch (e) {
       console.error('Failed to export JSON:', e);
     }
-  }, [matchType, doublesSubMode, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate, columnPrefs, customValues, pointsPerWin]);
+  }, [matchType, doublesSubMode, players, matches, selectedTheme, matchCountInput, customTitle, tournamentDate, columnPrefs, customValues, pointsPerWin, courtCount]);
 
   // --- JSON Import ---
   const importJSON = useCallback(
@@ -146,8 +151,9 @@ export function usePersistence({
           }
           isRestoring.current = true;
           if (data.players) setPlayers(data.players);
-          if (data.matches) setMatches(data.matches);
+          if (data.matches) setMatches(normalizeMatches(data.matches));
           if (data.matchType) setMatchType(data.matchType);
+          if (data.courtCount !== undefined) setCourtCount(data.courtCount);
           if (data.selectedTheme) setSelectedTheme(data.selectedTheme);
           if (data.matchCountInput !== undefined) setMatchCountInput(data.matchCountInput || '');
           if (data.customTitle !== undefined) setCustomTitle(data.customTitle || '');
@@ -168,7 +174,8 @@ export function usePersistence({
             data.doublesSubMode || 'randomized',
             data.columnPrefs || { gd: false, pts: false, custom: false },
             data.customValues || {},
-            data.pointsPerWin || 2
+            data.pointsPerWin || 2,
+            data.courtCount ?? 1
           );
           localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
           hasRestored.current = true;
@@ -180,7 +187,7 @@ export function usePersistence({
       };
       reader.readAsText(file);
     },
-    [setPlayers, setMatches, setMatchType, setSelectedTheme, setMatchCountInput, setCustomTitle, setTournamentDate, setDoublesSubMode, setColumnPrefs, setCustomValues, setPointsPerWin, removeLogo]
+    [setPlayers, setMatches, setMatchType, setSelectedTheme, setMatchCountInput, setCustomTitle, setTournamentDate, setDoublesSubMode, setColumnPrefs, setCustomValues, setPointsPerWin, setCourtCount, removeLogo]
   );
 
   // --- Reset ---

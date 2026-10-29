@@ -1,9 +1,47 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { generateRoundRobin, generateSocialDoubles } from '../utils/roundRobin';
+import {
+  clampCourtCount,
+  clampCourt,
+  clampRound,
+  generateSchedule,
+} from '../utils/scheduler';
 
 let nextId = 1;
 function generateId(prefix) {
   return `${prefix}-${nextId++}-${Date.now()}`;
+}
+
+function winnerFromScores(s1, s2) {
+  if (
+    s1 !== '' && s2 !== '' &&
+    /^\d+$/.test(String(s1).trim()) &&
+    /^\d+$/.test(String(s2).trim())
+  ) {
+    const n1 = parseInt(s1, 10);
+    const n2 = parseInt(s2, 10);
+    if (n1 > n2) return 'team1';
+    if (n2 > n1) return 'team2';
+    return 'draw';
+  }
+  return null;
+}
+
+function defaultCustomTeams(players, matchType, doublesSubMode) {
+  const isFixedDoubles = matchType === 'doubles' && doublesSubMode === 'fixed';
+  if (matchType === 'singles' || isFixedDoubles) {
+    return {
+      team1PlayerIds: players.length > 0 ? [players[0].id] : [],
+      team2PlayerIds: players.length > 1 ? [players[1].id] : [],
+    };
+  }
+  return {
+    team1PlayerIds: players.length > 1
+      ? [players[0].id, players[1].id]
+      : players.length > 0 ? [players[0].id] : [],
+    team2PlayerIds: players.length > 3
+      ? [players[2].id, players[3].id]
+      : players.length > 2 ? [players[2].id] : [],
+  };
 }
 
 const DEFAULT_SINGLES = [
@@ -33,6 +71,8 @@ export function useTournament() {
   const [players, setPlayers] = useState([]);
   const [matches, setMatches] = useState([]);
   const [matchCountInput, setMatchCountInput] = useState('');
+  const [courtCount, setCourtCountState] = useState(1);
+  const [generationError, setGenerationError] = useState(null);
 
   // Column preferences & custom values
   const [columnPrefs, setColumnPrefs] = useState({ gd: false, pts: false, custom: false });
@@ -49,10 +89,15 @@ export function useTournament() {
     subModeRef.current = doublesSubMode;
   }, [doublesSubMode]);
 
+  const setCourtCount = useCallback((value) => {
+    setCourtCountState(clampCourtCount(value));
+  }, []);
+
   const setMatchTypeWithReset = useCallback((type) => {
     setMatchType(type);
     setMatchCountInput('');
     setMatches([]);
+    setGenerationError(null);
   }, []);
 
   // --- Player Management ---
@@ -85,23 +130,25 @@ export function useTournament() {
   const generateMatches = useCallback((customCount) => {
     const currentPlayers = playersRef.current;
     const targetCount = customCount || undefined;
+    const currentSubMode = subModeRef.current;
 
-    if (matchType === 'singles') {
-      if (currentPlayers.length < 2) return;
-      setMatches(generateRoundRobin(currentPlayers, targetCount));
-    } else {
-      // Doubles — check sub-mode
-      if (subModeRef.current === 'fixed') {
-        // Fixed pairs: each player entry IS a pair
-        if (currentPlayers.length < 2) return;
-        setMatches(generateRoundRobin(currentPlayers, targetCount));
-      } else {
-        // Randomized/social doubles
-        if (currentPlayers.length < 4) return;
-        setMatches(generateSocialDoubles(currentPlayers, targetCount));
-      }
+    setGenerationError(null);
+
+    const result = generateSchedule({
+      players: currentPlayers,
+      matchCount: targetCount,
+      courtCount,
+      matchType,
+      doublesSubMode: currentSubMode,
+    });
+
+    if (result.error) {
+      setGenerationError(result.error);
+      return;
     }
-  }, [matchType]);
+
+    setMatches(result.matches);
+  }, [matchType, courtCount]);
 
   const updateScore = useCallback((matchId, field, value) => {
     setMatches((prev) =>
@@ -131,6 +178,7 @@ export function useTournament() {
   const resetMatches = useCallback(() => {
     setMatches([]);
     setMatchCountInput('');
+    setGenerationError(null);
   }, []);
 
   // --- Match Editing ---
@@ -149,6 +197,8 @@ export function useTournament() {
           team2PlayerIds: editData.team2PlayerIds,
           team1Score: editData.team1Score,
           team2Score: editData.team2Score,
+          round: clampRound(editData.round ?? m.round),
+          court: clampCourt(editData.court ?? m.court),
         };
         // Recalculate winner
         const s1 = updated.team1Score;
@@ -171,40 +221,37 @@ export function useTournament() {
     );
   }, []);
 
-  const addCustomMatch = useCallback(() => {
+  const addCustomMatch = useCallback((fixture) => {
     const currentPlayers = playersRef.current;
-    const matchId = generateId('match');
     const currentSubMode = subModeRef.current;
+    const defaults = defaultCustomTeams(currentPlayers, matchType, currentSubMode);
 
-    let team1Ids, team2Ids;
+    const team1PlayerIds = fixture?.team1PlayerIds || defaults.team1PlayerIds;
+    const team2PlayerIds = fixture?.team2PlayerIds || defaults.team2PlayerIds;
+    const team1Score = fixture?.team1Score ?? '';
+    const team2Score = fixture?.team2Score ?? '';
 
-    if (matchType === 'singles') {
-      team1Ids = currentPlayers.length > 0 ? [currentPlayers[0].id] : [];
-      team2Ids = currentPlayers.length > 1 ? [currentPlayers[1].id] : [];
-    } else if (currentSubMode === 'fixed') {
-      team1Ids = currentPlayers.length > 0 ? [currentPlayers[0].id] : [];
-      team2Ids = currentPlayers.length > 1 ? [currentPlayers[1].id] : [];
-    } else {
-      // Randomized doubles: 2 players per team
-      team1Ids = currentPlayers.length > 1
-        ? [currentPlayers[0].id, currentPlayers[1].id]
-        : currentPlayers.length > 0 ? [currentPlayers[0].id] : [];
-      team2Ids = currentPlayers.length > 3
-        ? [currentPlayers[2].id, currentPlayers[3].id]
-        : currentPlayers.length > 2 ? [currentPlayers[2].id] : [];
-    }
+    setMatches((prev) => {
+      const maxRound = prev.reduce((max, match, index) => {
+        const round = parseInt(match.round, 10);
+        const safeRound = Number.isFinite(round) && round >= 1 ? round : index + 1;
+        return Math.max(max, safeRound);
+      }, 0);
 
-    setMatches((prev) => [
-      ...prev,
-      {
-        id: matchId,
-        team1PlayerIds: team1Ids,
-        team2PlayerIds: team2Ids,
-        team1Score: '',
-        team2Score: '',
-        winnerId: null,
-      },
-    ]);
+      return [
+        ...prev,
+        {
+          id: generateId('match'),
+          team1PlayerIds,
+          team2PlayerIds,
+          team1Score,
+          team2Score,
+          winnerId: winnerFromScores(team1Score, team2Score),
+          round: clampRound(fixture?.round ?? maxRound + 1),
+          court: clampCourt(fixture?.court ?? 1),
+        },
+      ];
+    });
   }, [matchType]);
 
   // --- Reset All ---
@@ -214,6 +261,8 @@ export function useTournament() {
     setDoublesSubMode('randomized');
     setMatchCountInput('');
     setMatches([]);
+    setCourtCountState(1);
+    setGenerationError(null);
     const defaultPlayers = DEFAULT_SINGLES.map((name) => ({
       id: generateId('player'),
       name,
@@ -253,6 +302,9 @@ export function useTournament() {
     defaultMatchCount,
     matchCountInput,
     setMatchCountInput,
+    courtCount,
+    setCourtCount,
+    generationError,
     columnPrefs,
     setColumnPrefs,
     customValues,

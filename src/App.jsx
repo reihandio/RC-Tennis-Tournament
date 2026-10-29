@@ -4,7 +4,7 @@ import { useTournament } from './hooks/useTournament';
 import { useStandings } from './hooks/useStandings';
 import { useLogos } from './hooks/useLogos';
 import { useExport } from './hooks/useExport';
-import { usePersistence } from './hooks/usePersistence';
+import { usePersistence, STORAGE_KEY } from './hooks/usePersistence';
 import { THEMES } from './constants/themes';
 import Toolbar from './components/Toolbar';
 import MatchTypeSelector from './components/MatchTypeSelector';
@@ -39,6 +39,9 @@ export default function App() {
     defaultMatchCount,
     matchCountInput,
     setMatchCountInput,
+    courtCount,
+    setCourtCount,
+    generationError,
     columnPrefs,
     setColumnPrefs,
     customValues,
@@ -92,6 +95,7 @@ export default function App() {
     columnPrefs,
     customValues,
     pointsPerWin,
+    courtCount,
     setMatchType: setMatchTypeRaw,
     setDoublesSubMode,
     setPlayers,
@@ -103,6 +107,7 @@ export default function App() {
     setColumnPrefs,
     setCustomValues,
     setPointsPerWin,
+    setCourtCount,
     resetAll,
     removeLogo,
   });
@@ -118,7 +123,14 @@ export default function App() {
   useEffect(() => {
     if (!didInit.current && players.length === 0) {
       didInit.current = true;
-      resetAll();
+      let hasSavedState = false;
+      try {
+        hasSavedState =
+          typeof localStorage !== 'undefined' && !!localStorage.getItem(STORAGE_KEY);
+      } catch {
+        hasSavedState = false;
+      }
+      if (!hasSavedState) resetAll();
     }
   }, [players.length, resetAll]);
 
@@ -188,9 +200,12 @@ export default function App() {
                 onMatchCountChange={setMatchCountInput}
                 matchType={matchType}
                 doublesSubMode={doublesSubMode}
+                courtCount={courtCount}
+                onCourtCountChange={setCourtCount}
                 onGenerate={generateMatches}
                 onReset={resetMatches}
                 hasMatches={matches.length > 0}
+                generationError={generationError}
               />
               {matchType === 'doubles' && players.length > 0 && (
                 (doublesSubMode === 'fixed' && players.length < 2) ||
