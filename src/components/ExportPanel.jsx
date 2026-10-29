@@ -26,7 +26,7 @@ export default function ExportPanel({
               key={key}
               type="button"
               onClick={() => onThemeChange(key)}
-              className={`relative rounded-xl p-3 text-left transition-all duration-200 border-2 ${
+              className={`relative overflow-hidden rounded-xl p-3 text-left transition-all duration-200 border-2 before:absolute before:inset-0 before:bg-black/25 before:content-[''] before:pointer-events-none ${
                 isSelected
                   ? 'border-[#C2856C] shadow-[0_2px_12px_rgba(194,133,108,0.3)] scale-[1.03]'
                   : 'border-[#E8ECE9] hover:border-[#DDE2DD]'
@@ -34,16 +34,16 @@ export default function ExportPanel({
               style={{ background: theme.gradient, minHeight: '84px' }}
               aria-label={`Select ${theme.name} theme`}
             >
-              <span className="block text-xs font-bold mb-1" style={{ color: theme.text }}>
+              <span className="relative z-10 block text-xs font-bold mb-1" style={{ color: theme.text }}>
                 {theme.name}
               </span>
-              <span className="block text-[10px] opacity-75" style={{ color: theme.text }}>
+              <span className="relative z-10 block text-[10px]" style={{ color: theme.text }}>
                 {key === 'roland-garros' && 'Clay Court'}
                 {key === 'wimbledon' && 'Grass Court'}
                 {key === 'us-open' && 'Hard Court'}
               </span>
               {isSelected && (
-                <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-white shadow" />
+                <span className="absolute top-2 right-2 z-10 w-2.5 h-2.5 rounded-full bg-white shadow" />
               )}
             </button>
           );
@@ -55,7 +55,7 @@ export default function ExportPanel({
         type="button"
         onClick={onExport}
         disabled={!hasStandings || exporting}
-        className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-[#C2856C] to-[#B07058] text-white rounded-xl text-sm font-semibold hover:from-[#B07058] hover:to-[#A06048] active:from-[#A06048] active:to-[#905038] transition-all shadow-[0_2px_12px_rgba(194,133,108,0.3)] disabled:from-slate-300 disabled:to-slate-300 disabled:text-slate-400 disabled:cursor-not-allowed disabled:shadow-none"
+        className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-[#A06048] to-[#905038] text-white rounded-xl text-sm font-semibold hover:from-[#905038] hover:to-[#7A432F] active:from-[#7A432F] active:to-[#643626] transition-all shadow-[0_2px_12px_rgba(160,96,72,0.3)] disabled:from-slate-300 disabled:to-slate-300 disabled:text-slate-400 disabled:cursor-not-allowed disabled:shadow-none"
       >
         {exporting ? (
           <>
@@ -77,7 +77,7 @@ export default function ExportPanel({
         </div>
       )}
 
-      <p className="text-xs text-slate-400 mt-2 text-center">
+      <p className="text-xs text-slate-500 mt-2 text-center">
         High-res PNG (2x) with selected Grand Slam styling
       </p>
     </div>

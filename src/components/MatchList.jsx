@@ -71,7 +71,7 @@ export default function MatchList({
               : 'Doubles Matches'
             : 'Matches'}
         </h3>
-        <span className="text-xs text-slate-400 font-medium">
+        <span className="text-xs text-slate-500 font-medium">
           {matches.length > 0 && `${completedCount}/${matches.length} completed`}
         </span>
       </div>
@@ -90,10 +90,10 @@ export default function MatchList({
           <section key={round} className="mb-5 last:mb-0">
             <div className="flex items-center justify-between gap-2 mb-2">
               <div className="flex items-center gap-2">
-                <span className="inline-flex items-center rounded-full bg-[#8A9A86] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-white">
+                <span className="inline-flex items-center rounded-full bg-[#5A6B57] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-white">
                   Round {round}
                 </span>
-                <span className="text-xs text-slate-400 font-medium">
+                <span className="text-xs text-slate-500 font-medium">
                   {roundMatches.length} {roundMatches.length === 1 ? 'match' : 'matches'}
                 </span>
               </div>

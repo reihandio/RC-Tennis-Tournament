@@ -74,9 +74,9 @@ export default function MatchGenerator({
                   key={value}
                   type="button"
                   onClick={() => onCourtCountChange(value)}
-                  className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all duration-200 ${
+                  className={`flex min-h-11 flex-1 items-center justify-center py-1.5 text-xs font-semibold rounded-lg transition-all duration-200 ${
                     active
-                      ? 'bg-[#8A9A86] text-white shadow-[0_2px_6px_rgba(138,154,134,0.3)]'
+                      ? 'bg-[#5A6B57] text-white shadow-[0_2px_6px_rgba(90,107,87,0.3)]'
                       : 'text-slate-500 hover:text-slate-700 hover:bg-white/60'
                   }`}
                   aria-pressed={active}
@@ -100,7 +100,7 @@ export default function MatchGenerator({
         )}
 
         {courtsReduced && (
-          <p className="text-amber-600 text-xs flex items-center gap-1">
+          <p className="text-amber-700 text-xs flex items-center gap-1">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500" />
             Only {effectiveCourts} {effectiveCourts === 1 ? 'court' : 'courts'} can be
             used with {participants.length} {unitLabel}.
@@ -120,9 +120,9 @@ export default function MatchGenerator({
               value={matchCountInput}
               onChange={(e) => onMatchCountChange(e.target.value)}
               placeholder={String(defaultMatchCount)}
-              className="w-20 px-3 py-2 rounded-xl border-2 border-[#E8ECE9] text-sm text-center font-mono focus:outline-none focus:ring-2 focus:ring-[#8A9A86] focus:border-transparent bg-white"
+              className="w-20 min-h-11 px-3 py-2 rounded-xl border-2 border-[#7A8C76] text-sm text-center font-mono placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5A6B57] focus:border-transparent bg-white"
             />
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-slate-500">
               (default: {defaultMatchCount})
             </span>
           </div>
@@ -133,7 +133,7 @@ export default function MatchGenerator({
             type="button"
             onClick={handleGenerate}
             disabled={!validation.valid || noCourt}
-            className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-[#8A9A86] text-white rounded-xl text-sm font-semibold hover:bg-[#6B7D67] active:bg-[#5A6B57] transition-all shadow-[0_2px_8px_rgba(138,154,134,0.3)] disabled:bg-slate-300 disabled:text-slate-400 disabled:cursor-not-allowed disabled:shadow-none"
+            className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-[#5A6B57] text-white rounded-xl text-sm font-semibold hover:bg-[#4F5F4C] active:bg-[#435043] transition-all shadow-[0_2px_8px_rgba(90,107,87,0.3)] disabled:bg-slate-300 disabled:text-slate-400 disabled:cursor-not-allowed disabled:shadow-none"
           >
             <Swords size={16} />
             Generate {isFixedDoubles ? 'Fixed Doubles' : matchType === 'doubles' ? 'Doubles' : 'All'} Matches
@@ -152,7 +152,7 @@ export default function MatchGenerator({
         </div>
 
         {noCourt && (
-          <p className="text-amber-600 text-xs flex items-center gap-1">
+          <p className="text-amber-700 text-xs flex items-center gap-1">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500" />
             Not enough {unitLabel} for even one court. {playersPerMatch}{' '}
             {unitLabel} are required per match.
@@ -160,15 +160,15 @@ export default function MatchGenerator({
         )}
 
         {!noCourt && !validation.valid && participants.length > 0 && (
-          <p className="text-amber-600 text-xs flex items-center gap-1">
+          <p className="text-amber-700 text-xs flex items-center gap-1">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500" />
             {validation.error}
           </p>
         )}
 
         {generationError && (
-          <p className="text-red-500 text-xs flex items-center gap-1">
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-500" />
+          <p className="text-red-600 text-xs flex items-center gap-1">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-600" />
             {generationError}
           </p>
         )}

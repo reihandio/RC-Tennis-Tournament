@@ -20,9 +20,9 @@ export default function MatchTypeSelector({
         <button
           type="button"
           onClick={() => onChange('singles')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-semibold rounded-xl transition-all duration-200 ${
+          className={`flex min-h-11 flex-1 items-center justify-center gap-2 py-2.5 px-4 text-sm font-semibold rounded-xl transition-all duration-200 ${
             isSingles
-              ? 'bg-[#8A9A86] text-white shadow-[0_2px_8px_rgba(138,154,134,0.4)]'
+              ? 'bg-[#5A6B57] text-white shadow-[0_2px_8px_rgba(90,107,87,0.4)]'
               : 'text-slate-500 hover:text-slate-700 hover:bg-white/60'
           }`}
         >
@@ -32,9 +32,9 @@ export default function MatchTypeSelector({
         <button
           type="button"
           onClick={() => onChange('doubles')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-semibold rounded-xl transition-all duration-200 ${
+          className={`flex min-h-11 flex-1 items-center justify-center gap-2 py-2.5 px-4 text-sm font-semibold rounded-xl transition-all duration-200 ${
             !isSingles
-              ? 'bg-[#C2856C] text-white shadow-[0_2px_8px_rgba(194,133,108,0.4)]'
+              ? 'bg-[#A06048] text-white shadow-[0_2px_8px_rgba(160,96,72,0.4)]'
               : 'text-slate-500 hover:text-slate-700 hover:bg-white/60'
           }`}
         >
@@ -49,9 +49,9 @@ export default function MatchTypeSelector({
           <button
             type="button"
             onClick={() => onSubModeChange('randomized')}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold rounded-xl transition-all duration-200 ${
+            className={`flex min-h-11 flex-1 items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold rounded-xl transition-all duration-200 ${
               !isFixed
-                ? 'bg-[#8A9A86] text-white shadow-[0_2px_6px_rgba(138,154,134,0.3)]'
+                ? 'bg-[#5A6B57] text-white shadow-[0_2px_6px_rgba(90,107,87,0.3)]'
                 : 'text-slate-500 hover:text-slate-700 hover:bg-white/60'
             }`}
           >
@@ -61,9 +61,9 @@ export default function MatchTypeSelector({
           <button
             type="button"
             onClick={() => onSubModeChange('fixed')}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold rounded-xl transition-all duration-200 ${
+            className={`flex min-h-11 flex-1 items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold rounded-xl transition-all duration-200 ${
               isFixed
-                ? 'bg-[#C2856C] text-white shadow-[0_2px_6px_rgba(194,133,108,0.3)]'
+                ? 'bg-[#A06048] text-white shadow-[0_2px_6px_rgba(160,96,72,0.3)]'
                 : 'text-slate-500 hover:text-slate-700 hover:bg-white/60'
             }`}
           >

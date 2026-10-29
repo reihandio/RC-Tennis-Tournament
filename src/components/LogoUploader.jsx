@@ -26,7 +26,7 @@ export default function LogoUploader({ logo, onLogoUpload, onLogoRemove }) {
           <button
             type="button"
             onClick={onLogoRemove}
-            className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-red-600"
+            className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100 transition-opacity shadow-md hover:bg-red-600 before:absolute before:-inset-2 before:content-['']"
             aria-label="Remove logo"
           >
             <X size={14} />
@@ -52,7 +52,7 @@ export default function LogoUploader({ logo, onLogoUpload, onLogoRemove }) {
         aria-label="Upload logo"
       />
 
-      <p className="text-xs text-slate-400 mt-1">
+      <p className="text-xs text-slate-500 mt-1">
         Appears on exported standings PNG
       </p>
     </div>

@@ -37,7 +37,7 @@ export default function PlayerManager({ players, matchType, doublesSubMode, onAd
     <div className="w-full">
       <label className="block text-sm font-semibold text-slate-700 mb-2">
         {isFixedDoubles ? 'Pairs / Teams' : 'Players'}
-        <span className="text-slate-400 font-normal ml-1">({players.length})</span>
+        <span className="text-slate-500 font-normal ml-1">({players.length})</span>
       </label>
 
       <div className="flex gap-2 mb-3">
@@ -47,13 +47,13 @@ export default function PlayerManager({ players, matchType, doublesSubMode, onAd
           onChange={(e) => { setInputValue(e.target.value); if (error) setError(null); }}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="flex-1 px-4 py-2.5 border-2 border-[#E8ECE9] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#8A9A86] focus:border-transparent transition-shadow bg-white"
+          className="flex-1 px-4 py-2.5 border-2 border-[#7A8C76] rounded-xl text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5A6B57] focus:border-transparent transition-shadow bg-white"
           maxLength={60}
         />
         <button
           type="button"
           onClick={handleAdd}
-          className="flex items-center justify-center gap-1.5 px-5 py-2.5 bg-[#8A9A86] text-white rounded-xl text-sm font-semibold hover:bg-[#6B7D67] active:bg-[#5A6B57] transition-colors shadow-[0_2px_8px_rgba(138,154,134,0.3)]"
+          className="flex min-h-11 items-center justify-center gap-1.5 px-5 py-2.5 bg-[#5A6B57] text-white rounded-xl text-sm font-semibold hover:bg-[#4F5F4C] active:bg-[#435043] transition-colors shadow-[0_2px_8px_rgba(90,107,87,0.3)]"
         >
           <Plus size={16} />
           Add
@@ -61,8 +61,8 @@ export default function PlayerManager({ players, matchType, doublesSubMode, onAd
       </div>
 
       {error && (
-        <p className="text-red-500 text-xs mb-2 flex items-center gap-1">
-          <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-500" />
+        <p className="text-red-600 text-xs mb-2 flex items-center gap-1">
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-600" />
           {error}
         </p>
       )}
@@ -79,7 +79,7 @@ export default function PlayerManager({ players, matchType, doublesSubMode, onAd
               <button
                 type="button"
                 onClick={() => onRemovePlayer(player.id)}
-                className="ml-0.5 p-0.5 rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                className="relative ml-0.5 p-0.5 rounded-full text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors before:absolute before:-inset-2 before:content-['']"
                 aria-label={`Remove ${player.name}`}
               >
                 <X size={14} />
@@ -90,7 +90,7 @@ export default function PlayerManager({ players, matchType, doublesSubMode, onAd
       )}
 
       {players.length === 0 && (
-        <p className="text-sm text-slate-400 italic">
+        <p className="text-sm text-slate-500 italic">
           Add at least {minLabel} players to generate matches
         </p>
       )}

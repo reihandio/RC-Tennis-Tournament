@@ -10,7 +10,7 @@ export default function StandingsTable({
 }) {
   if (standings.length === 0) {
     return (
-      <div className="text-center py-12 text-slate-400">
+      <div className="text-center py-12 text-slate-500">
         <Trophy size={40} className="mx-auto mb-3 opacity-20" />
         <p className="text-sm">No standings yet.</p>
         <p className="text-xs mt-1">Generate matches and enter scores to see rankings.</p>
@@ -28,21 +28,21 @@ export default function StandingsTable({
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm table-fixed">
+      <table className="w-full min-w-[560px] text-sm table-fixed">
         <thead>
           <tr className="border-b-2 border-[#E8ECE9]">
-            <th className="text-left py-3 px-1 text-xs font-semibold text-slate-400 uppercase tracking-wider w-[6%]">#</th>
-            <th className="text-left py-3 px-2 text-xs font-semibold text-slate-400 uppercase tracking-wider" style={{ width: nameW }}>
+            <th className="text-left py-3 px-1 text-xs font-semibold text-slate-500 uppercase tracking-wider w-[6%]">#</th>
+            <th className="text-left py-3 px-2 text-xs font-semibold text-slate-500 uppercase tracking-wider" style={{ width: nameW }}>
               {nameLabel}
             </th>
-            <th className="text-center py-3 px-1 text-xs font-semibold text-slate-400 uppercase tracking-wider w-[7%]">P</th>
-            <th className="text-center py-3 px-1 text-xs font-semibold text-slate-400 uppercase tracking-wider w-[7%]">W</th>
-            <th className="text-center py-3 px-1 text-xs font-semibold text-slate-400 uppercase tracking-wider w-[7%]">L</th>
-            <th className="text-center py-3 px-1 text-xs font-semibold text-slate-400 uppercase tracking-wider w-[8%] whitespace-nowrap">+/-</th>
-            <th className="text-center py-3 px-1 text-xs font-semibold text-slate-400 uppercase tracking-wider w-[10%]">Win %</th>
-            <th className="text-center py-3 px-1 text-xs font-semibold text-slate-400 uppercase tracking-wider w-[7%]">PTS</th>
+            <th className="text-center py-3 px-1 text-xs font-semibold text-slate-500 uppercase tracking-wider w-[7%]">P</th>
+            <th className="text-center py-3 px-1 text-xs font-semibold text-slate-500 uppercase tracking-wider w-[7%]">W</th>
+            <th className="text-center py-3 px-1 text-xs font-semibold text-slate-500 uppercase tracking-wider w-[7%]">L</th>
+            <th className="text-center py-3 px-1 text-xs font-semibold text-slate-500 uppercase tracking-wider w-[8%] whitespace-nowrap">+/-</th>
+            <th className="text-center py-3 px-1 text-xs font-semibold text-slate-500 uppercase tracking-wider w-[10%]">Win %</th>
+            <th className="text-center py-3 px-1 text-xs font-semibold text-slate-500 uppercase tracking-wider w-[7%]">PTS</th>
             {showCustom && (
-              <th className="text-center py-3 px-1 text-xs font-semibold text-slate-400 uppercase tracking-wider w-[14%]">Note</th>
+              <th className="text-center py-3 px-1 text-xs font-semibold text-slate-500 uppercase tracking-wider w-[14%]">Note</th>
             )}
           </tr>
         </thead>
@@ -59,11 +59,11 @@ export default function StandingsTable({
                   {index === 0 && row.played > 0 ? (
                     <Trophy size={17} className="text-amber-500" />
                   ) : index === 1 && row.played > 0 ? (
-                    <Medal size={16} className="text-slate-400" />
+                    <Medal size={16} className="text-slate-500" />
                   ) : index === 2 && row.played > 0 ? (
                     <Medal size={16} className="text-amber-700" />
                   ) : (
-                    <span className="text-slate-400 text-xs font-medium">{row.position}</span>
+                    <span className="text-slate-500 text-xs font-medium">{row.position}</span>
                   )}
                 </span>
               </td>
@@ -75,16 +75,16 @@ export default function StandingsTable({
                 </span>
               </td>
               <td className="py-2.5 px-1 text-center font-mono text-slate-600 text-xs">{row.played}</td>
-              <td className="py-2.5 px-1 text-center font-mono text-emerald-600 font-semibold text-xs">{row.wins}</td>
-              <td className="py-2.5 px-1 text-center font-mono text-rose-500 text-xs">{row.losses}</td>
+              <td className="py-2.5 px-1 text-center font-mono text-emerald-700 font-semibold text-xs">{row.wins}</td>
+              <td className="py-2.5 px-1 text-center font-mono text-rose-600 text-xs">{row.losses}</td>
               <td className="py-2.5 px-1 text-center font-mono font-semibold text-xs">
-                <span className={row.gameDiff > 0 ? 'text-emerald-600' : row.gameDiff < 0 ? 'text-rose-500' : 'text-slate-400'}>
+                <span className={row.gameDiff > 0 ? 'text-emerald-700' : row.gameDiff < 0 ? 'text-rose-600' : 'text-slate-500'}>
                   {row.gameDiff > 0 ? '+' : ''}{row.gameDiff}
                 </span>
               </td>
               <td className="py-2.5 px-1 text-center font-mono text-xs">
                 <span className={`font-semibold ${
-                  row.played > 0 ? row.winPct >= 50 ? 'text-emerald-600' : 'text-rose-500' : 'text-slate-400'
+                  row.played > 0 ? row.winPct >= 50 ? 'text-emerald-700' : 'text-rose-600' : 'text-slate-500'
                 }`}>
                   {row.played > 0 ? `${row.winPct}%` : '—'}
                 </span>
@@ -97,7 +97,7 @@ export default function StandingsTable({
                     value={customValues?.[row.playerId] || ''}
                     onChange={(e) => onCustomValueChange?.(row.playerId, e.target.value)}
                     placeholder="—"
-                    className="w-full px-2 py-1 border border-[#E8ECE9] rounded-lg text-xs text-center focus:outline-none focus:ring-1 focus:ring-[#8A9A86] bg-white"
+                    className="w-full px-2 py-1 border border-[#7A8C76] rounded-lg text-xs text-center placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#5A6B57] bg-white"
                   />
                 </td>
               )}

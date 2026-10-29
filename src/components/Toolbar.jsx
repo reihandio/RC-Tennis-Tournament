@@ -31,27 +31,27 @@ export default function Toolbar({ onExportJSON, onImportJSON, onReset }) {
   };
 
   return (
-    <div className="flex items-center gap-1.5 sm:gap-2">
+    <div className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2">
       {/* Save / Export JSON */}
       <button
         type="button"
         onClick={onExportJSON}
-        className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-600 hover:text-[#8A9A86] hover:bg-[#E8ECE9]/50 active:bg-[#E8ECE9] transition-all"
+        className="flex min-h-11 items-center gap-1.5 px-2 py-2 rounded-xl text-xs sm:px-3 sm:text-sm font-medium text-slate-600 hover:text-[#5A6B57] hover:bg-[#E8ECE9]/50 active:bg-[#E8ECE9] transition-all"
         title="Save progress as JSON file"
       >
         <FileDown size={16} />
-        <span className="hidden sm:inline">Save</span>
+        <span>Save</span>
       </button>
 
       {/* Load / Import JSON */}
       <button
         type="button"
         onClick={handleImportClick}
-        className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-600 hover:text-[#8A9A86] hover:bg-[#E8ECE9]/50 active:bg-[#E8ECE9] transition-all"
+        className="flex min-h-11 items-center gap-1.5 px-2 py-2 rounded-xl text-xs sm:px-3 sm:text-sm font-medium text-slate-600 hover:text-[#5A6B57] hover:bg-[#E8ECE9]/50 active:bg-[#E8ECE9] transition-all"
         title="Load progress from JSON file"
       >
         <FolderOpen size={16} />
-        <span className="hidden sm:inline">Load</span>
+        <span>Load</span>
       </button>
       <input
         ref={fileInputRef}
@@ -66,22 +66,22 @@ export default function Toolbar({ onExportJSON, onImportJSON, onReset }) {
       <button
         type="button"
         onClick={handleResetClick}
-        className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+        className={`flex min-h-11 items-center gap-1.5 px-2 py-2 rounded-xl text-xs sm:px-3 sm:text-sm font-medium transition-all ${
           showResetConfirm
-            ? 'bg-red-500 text-white shadow-[0_2px_8px_rgba(239,68,68,0.3)]'
-            : 'text-slate-500 hover:text-red-500 hover:bg-red-50 active:bg-red-100'
+            ? 'bg-red-600 text-white shadow-[0_2px_8px_rgba(220,38,38,0.3)]'
+            : 'text-slate-500 hover:text-red-600 hover:bg-red-50 active:bg-red-100'
         }`}
         title={showResetConfirm ? 'Click again to confirm reset' : 'Start a new tournament'}
       >
         {showResetConfirm ? (
           <>
             <Check size={16} />
-            <span className="hidden sm:inline">Confirm Reset</span>
+            <span>Confirm Reset</span>
           </>
         ) : (
           <>
             <RotateCcw size={16} />
-            <span className="hidden sm:inline">New</span>
+            <span>New</span>
           </>
         )}
       </button>
