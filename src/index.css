@@ -6,6 +6,37 @@ body {
   background-color: #FAF9F6;
 }
 
+@layer base {
+  button:not(:disabled),
+  select:not(:disabled),
+  summary,
+  input[type='checkbox']:not(:disabled),
+  input[type='radio']:not(:disabled),
+  label:has(> input[type='checkbox']),
+  label:has(> input[type='radio']) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  select:disabled,
+  input:disabled {
+    cursor: not-allowed;
+  }
+
+  :focus-visible {
+    outline: 2px solid #5A6B57;
+    outline-offset: 2px;
+  }
+
+  button:focus-visible,
+  [role='button']:focus-visible,
+  summary:focus-visible {
+    outline: 2px solid #5A6B57 !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 2px #FAF9F6, 0 0 0 4px #5A6B57 !important;
+  }
+}
+
 /* Export container — fixed canvas for consistent PNG dimensions at all viewport sizes */
 .export-canvas-wrapper {
   overflow-x: auto;
